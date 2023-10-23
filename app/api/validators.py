@@ -62,12 +62,9 @@ async def check_charityproject_to_delete(
 
 
 async def check_charityproject_closed(
-        project_id: int,
-        session: AsyncSession
+        charityproject: CharityProject,
+        # session: AsyncSession
 ) -> None:
-    charityproject = await check_charityproject_exists(
-        project_id, session
-    )
     if charityproject.fully_invested:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -76,14 +73,10 @@ async def check_charityproject_closed(
 
 
 async def check_full_amount_to_update(
-        charityproject_id: int,
+        charityproject: CharityProject,
+        full_amount: int,
         session: AsyncSession,
-        full_amount: int
 ):
-    charityproject = await check_charityproject_exists(
-        charityproject_id,
-        session
-    )
     if charityproject.invested_amount > full_amount:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

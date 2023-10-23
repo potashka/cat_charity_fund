@@ -51,6 +51,7 @@ async def create_new_charityproject(
 @router.patch(
     '/{project_id}',
     response_model=CharityProjectDB,
+    # response_model_exclude_none=True,
     dependencies=[Depends(current_superuser)],
     summary=(
         'Редактирование проекта'
@@ -64,19 +65,19 @@ async def partially_update_charitypoject(
     """
     Только для суперъюзеров
     """
-    project = await validators.check_charityproject_exists(project_id, session)
-    await validators.check_charityproject_closed(project_id, session)
+    charityproject = await validators.check_charityproject_exists(project_id, session)
+    await validators.check_charityproject_closed(charityproject)
     if obj_in.full_amount is not None:
         await validators.check_full_amount_to_update(
-            project_id, obj_in.full_amount, session
+            charityproject, obj_in.full_amount, session
         )
 
     if obj_in.name is not None:
         await validators.check_name_duplicate(obj_in.name, session)
-    project = await charityproject_crud.update(project, obj_in, session)
-    await distribute_donations(project, session)
-    await session.refresh(project)
-    return project
+    updated_project = await charityproject_crud.update(charityproject, obj_in, session)
+    await distribute_donations(updated_project, session)
+    await session.refresh(updated_project)
+    return updated_project
 
 
 @router.delete(

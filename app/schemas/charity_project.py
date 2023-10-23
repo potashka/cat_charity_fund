@@ -41,12 +41,8 @@ class CharityProjectDB(CharityProjectCreate):
 
 
 class CharityProjectUpdate(CharityProjectBase):
-    name: Optional[str] = Field(max_length=100, )
-    description: Optional[str] = Field()
-    full_amount: Optional[PositiveInt]
 
     class Config:
-        extra = Extra.forbid
         schema_extra = {
             'example': {
                 'name': 'Жирные коты',
