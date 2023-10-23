@@ -1,11 +1,9 @@
 from typing import Optional
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import asc, false, select
+from sqlalchemy import asc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy.sql.expression import not_
-
-# from app.models import CharityProject, Donation
+from sqlalchemy.sql.expression import not_
 
 from app.models import User
 
@@ -34,30 +32,26 @@ class CRUDBase:
         db_objs = await session.execute(select(self.model))
         return db_objs.scalars().all()
 
-    async def get_not_closed_objects(
+    async def get_open_objects(
         self,
         session: AsyncSession,
     ):
-        """
-        charity_projects = await session.scalars(
-            select(self.model).where(not_(self.model.fully_invested))
-            .order_by(self.model.create_date)
-        )
-        return charity_projects
-        """
-        open_objs = await session.execute(
-            select(self.model).where(
-                self.model.fully_invested == false()
-            ).order_by(
+        open_objects = await session.execute(
+            select(self.model)
+            .where(
+                not_(self.model.fully_invested)
+            )
+            .order_by(
                 asc(self.model.create_date)
             )
         )
-        return open_objs.scalars().all()
+        return open_objects.scalars().all()
 
     async def create(
             self,
             obj_in,
             session: AsyncSession,
+            commit: bool = True,
             user: Optional[User] = None
     ):
         obj_in_data = obj_in.dict()
@@ -65,8 +59,9 @@ class CRUDBase:
             obj_in_data['user_id'] = user.id
         db_obj = self.model(**obj_in_data)
         session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
+        if commit:
+            await session.commit()
+            await session.refresh(db_obj)
         return db_obj
 
     async def update(
@@ -74,6 +69,7 @@ class CRUDBase:
             db_obj,
             obj_in,
             session: AsyncSession,
+            commit: bool = True,
     ):
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in.dict(exclude_unset=True)
@@ -82,8 +78,9 @@ class CRUDBase:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
         session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
+        if commit:
+            await session.commit()
+            await session.refresh(db_obj)
         return db_obj
 
     async def remove(

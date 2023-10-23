@@ -5,6 +5,8 @@ import app.api.validators as validators
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charityproject_crud
+from app.crud.donation import donation_crud
+from app.models import Donation
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
@@ -42,8 +44,18 @@ async def create_new_charityproject(
     Только для суперъюзеров
     """
     await validators.check_name_duplicate(charityproject.name, session)
-    new_project = await charityproject_crud.create(charityproject, session)
-    await distribute_donations(new_project, session)
+    new_project = await charityproject_crud.create(charityproject, session, False)
+    crud = (
+        charityproject_crud
+        if isinstance(new_project, Donation)
+        else donation_crud)
+    session.add_all(
+        distribute_donations(
+            new_project,
+            await crud.get_open_objects(session=session)
+        )
+    )
+    await session.commit()
     await session.refresh(new_project)
     return new_project
 
@@ -51,7 +63,6 @@ async def create_new_charityproject(
 @router.patch(
     '/{project_id}',
     response_model=CharityProjectDB,
-    # response_model_exclude_none=True,
     dependencies=[Depends(current_superuser)],
     summary=(
         'Редактирование проекта'
@@ -75,7 +86,6 @@ async def partially_update_charitypoject(
     if obj_in.name is not None:
         await validators.check_name_duplicate(obj_in.name, session)
     updated_project = await charityproject_crud.update(charityproject, obj_in, session)
-    await distribute_donations(updated_project, session)
     await session.refresh(updated_project)
     return updated_project
 
