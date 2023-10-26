@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    Boolean, Column, DateTime, Integer
+    Boolean, CheckConstraint, Column, DateTime, Integer
 )
 
 from app.core.db import Base
@@ -11,6 +11,14 @@ INVESTED_AMOUNT_DEFAULT = 0
 
 class PreBaseCharityDonation(Base):
     __abstract__ = True
+    __table_args__ = (
+        CheckConstraint(
+            'full_amount >= invested_amount >= 0',
+            name=(
+                'поле "full_amount" положительно и >= "invested_amount"'
+            )
+        ),
+    )
 
     full_amount = Column(Integer, nullable=False)
     invested_amount = Column(Integer, default=INVESTED_AMOUNT_DEFAULT)
@@ -20,6 +28,6 @@ class PreBaseCharityDonation(Base):
 
     def __repr__(self):
         return (
-            f'Бюджет {self.full_amount}, '
-            f'Инвестировано {self.invested_amount}'
+            f'Бюджет фонда {self.full_amount}, '
+            f'Уже инвестировано {self.invested_amount}'
         )

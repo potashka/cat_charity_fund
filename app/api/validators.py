@@ -61,7 +61,7 @@ async def check_charityproject_to_delete(
     return charityproject
 
 
-async def check_charityproject_closed(
+def check_charityproject_closed(
         charityproject: CharityProject,
         # session: AsyncSession
 ) -> None:
@@ -72,7 +72,7 @@ async def check_charityproject_closed(
         )
 
 
-async def check_full_amount_to_update(
+def check_full_amount_to_update(
         charityproject: CharityProject,
         full_amount: int,
         session: AsyncSession,

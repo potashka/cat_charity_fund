@@ -6,7 +6,7 @@ from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charityproject_crud
 from app.crud.donation import donation_crud
-from app.models import Donation
+# from app.models import Donation
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
@@ -44,11 +44,14 @@ async def create_new_charityproject(
     Только для суперъюзеров
     """
     await validators.check_name_duplicate(charityproject.name, session)
-    new_project = await charityproject_crud.create(charityproject, session, False)
-    crud = (
+    new_project = await charityproject_crud.create(
+        charityproject, session, False
+    )
+    """crud = (
         charityproject_crud
         if isinstance(new_project, Donation)
-        else donation_crud)
+        else donation_crud)"""
+    crud = donation_crud
     session.add_all(
         distribute_donations(
             new_project,
@@ -77,9 +80,9 @@ async def partially_update_charitypoject(
     Только для суперъюзеров
     """
     charityproject = await validators.check_charityproject_exists(project_id, session)
-    await validators.check_charityproject_closed(charityproject)
+    validators.check_charityproject_closed(charityproject)
     if obj_in.full_amount is not None:
-        await validators.check_full_amount_to_update(
+        validators.check_full_amount_to_update(
             charityproject, obj_in.full_amount, session
         )
 
