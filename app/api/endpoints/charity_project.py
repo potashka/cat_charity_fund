@@ -6,7 +6,6 @@ from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charityproject_crud
 from app.crud.donation import donation_crud
-# from app.models import Donation
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
@@ -47,10 +46,6 @@ async def create_new_charityproject(
     new_project = await charityproject_crud.create(
         charityproject, session, False
     )
-    """crud = (
-        charityproject_crud
-        if isinstance(new_project, Donation)
-        else donation_crud)"""
     crud = donation_crud
     session.add_all(
         distribute_donations(
