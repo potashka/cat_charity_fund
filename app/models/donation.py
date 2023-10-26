@@ -8,4 +8,7 @@ class Donation(PreBaseCharityDonation):
     user_id = Column(Integer, ForeignKey('user.id'))
 
     def __repr__(self):
-        return f'Пожертвование. {super().__repr__()}'
+        return (
+            f'Пожертвование от {self.user_id} с целью{self.comment}. '
+            f'{super().__repr__()}'
+        )

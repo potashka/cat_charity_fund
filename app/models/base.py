@@ -29,5 +29,7 @@ class PreBaseCharityDonation(Base):
     def __repr__(self):
         return (
             f'Бюджет фонда {self.full_amount}, '
-            f'Уже инвестировано {self.invested_amount}'
+            f'Уже инвестировано {self.invested_amount}, '
+            f'Дата открытия {self.create_date}, '
+            f'Дата закрытия {self.close_date}, '
         )

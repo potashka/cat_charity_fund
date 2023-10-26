@@ -5,7 +5,7 @@ from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
 from app.crud.charity_project import charityproject_crud
 from app.crud.donation import donation_crud
-from app.models import Donation, User
+from app.models import User
 from app.schemas.donation import DonationCreate, DonationDB
 from app.services.donation import distribute_donations
 
@@ -64,15 +64,11 @@ async def create_new_donation(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
 ):
-    new_donation = await donation_crud.create(donation, session, user)
-    crud = (
-        charityproject_crud
-        if isinstance(new_donation, Donation)
-        else donation_crud)
+    new_donation = await donation_crud.create(donation, session, False, user)
     session.add_all(
         distribute_donations(
             new_donation,
-            await crud.get_open_objects(session=session)
+            await charityproject_crud.get_open_objects(session=session)
         )
     )
     await session.commit()

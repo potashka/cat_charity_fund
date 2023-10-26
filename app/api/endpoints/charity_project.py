@@ -46,11 +46,10 @@ async def create_new_charityproject(
     new_project = await charityproject_crud.create(
         charityproject, session, False
     )
-    crud = donation_crud
     session.add_all(
         distribute_donations(
             new_project,
-            await crud.get_open_objects(session=session)
+            await donation_crud.get_open_objects(session=session)
         )
     )
     await session.commit()
@@ -80,7 +79,6 @@ async def partially_update_charitypoject(
         validators.check_full_amount_to_update(
             charityproject, obj_in.full_amount, session
         )
-
     if obj_in.name is not None:
         await validators.check_name_duplicate(obj_in.name, session)
     updated_project = await charityproject_crud.update(charityproject, obj_in, session)

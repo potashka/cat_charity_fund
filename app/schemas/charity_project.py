@@ -17,6 +17,7 @@ class CharityProjectBase(BaseModel):
 class CharityProjectCreate(CharityProjectBase):
     name: str = Field(..., max_length=100)
     description: str = Field(..., )
+    invested_amount: int = Field(default=0)
     full_amount: PositiveInt
 
     class Config:
@@ -31,7 +32,6 @@ class CharityProjectCreate(CharityProjectBase):
 
 class CharityProjectDB(CharityProjectCreate):
     id: int
-    invested_amount: int
     fully_invested: bool
     create_date: datetime
     close_date: Optional[datetime]
